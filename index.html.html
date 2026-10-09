@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LitKit - Year 3 Foundational Literacy Hub</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Google Fonts: Playful & Highly Readable -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            fredoka: ['Fredoka', 'sans-serif'],
+            quicksand: ['Quicksand', 'sans-serif'],
+          },
+          colors: {
+            noun: '#3b82f6',     // Blue for Nouns
+            verb: '#22c55e',     // Green for Verbs
+            adj: '#f59e0b',      // Yellow/Amber for Adjectives
+            playfulBg: '#f0fdf4',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background-color: #f8fafc;
+      user-select: none;
+    }
+
+    .font-heading {
+      font-family: 'Fredoka', cursive;
+    }
+
+    /* Print styles for Worksheets */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printable-area, #printable-area * {
+        visibility: visible;
+      }
+      #printable-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+
+    .card-flip-inner {
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+    .card-flipped .card-flip-inner {
+      transform: rotateY(180deg);
+    }
+    .card-front, .card-back {
+      backface-visibility: hidden;
+    }
+    .card-back {
+      transform: rotateY(180deg);
+    }
+  </style>
+</head>
+<body class="bg-amber-50/40 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- Header / Navigation Bar -->
+  <header class="bg-white border-b-4 border-amber-300 shadow-sm sticky top-0 z-40 no-print">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Logo -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="showTab('tab-word-explorer')">
+        <div class="w-12 h-12 bg-gradient-to-tr from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-md transform hover:scale-105 transition">
+          <i class="fa-solid fa-shapes"></i>
+        </div>
+        <div>
+          <h1 class="font-heading text-2xl font-bold text-amber-600 leading-tight">LitKit Hub</h1>
+          <p class="text-xs font-bold text-slate-400 tracking-wide uppercase">Year 3 Literacy Learning Kit</p>
+        </div>
+      </div>
+
+      <!-- Main Kid Navigation -->
+      <nav class="flex flex-wrap items-center gap-2">
+        <button onclick="showTab('tab-word-explorer')" id="btn-word-explorer" class="nav-btn bg-amber-100 text-amber-800 px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-amber-200 transition border-2 border-amber-300 shadow-sm">
+          <i class="fa-solid fa-magnifying-glass text-amber-600"></i>
+          <span>1. Word Explorer</span>
+        </button>
+
+        <button onclick="showTab('tab-reading-rescue')" id="btn-reading-rescue" class="nav-btn bg-sky-50 text-sky-700 px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-sky-100 transition border-2 border-transparent">
+          <i class="fa-solid fa-life-ring text-sky-500"></i>
+          <span>2. Reading Rescue</span>
+        </button>
+
+        <button onclick="showTab('tab-sentence-builder')" id="btn-sentence-builder" class="nav-btn bg-emerald-50 text-emerald-700 px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-emerald-100 transition border-2 border-transparent">
+          <i class="fa-solid fa-puzzle-piece text-emerald-500"></i>
+          <span>3. Sentence Builder</span>
+        </button>
+
+        <button onclick="showTab('tab-digital-corner')" id="btn-digital-corner" class="nav-btn bg-purple-50 text-purple-700 px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-purple-100 transition border-2 border-transparent">
+          <i class="fa-solid fa-gamepad text-purple-500"></i>
+          <span>4. Fun Arcade</span>
+        </button>
+
+        <button onclick="showTab('tab-worksheets')" id="btn-worksheets" class="nav-btn bg-rose-50 text-rose-700 px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-rose-100 transition border-2 border-transparent">
+          <i class="fa-solid fa-print text-rose-500"></i>
+          <span>Printables</span>
+        </button>
+      </nav>
+
+      <!-- Mode Switcher (Kid Mode vs Educator Guide) & Stars Counter -->
+      <div class="flex items-center gap-3">
+        <!-- Pupil Star Badge -->
+        <div class="bg-amber-100 border-2 border-amber-300 text-amber-800 px-3 py-1.5 rounded-full font-bold text-sm flex items-center gap-2 shadow-inner">
+          <i class="fa-solid fa-star text-amber-500 animate-bounce"></i>
+          <span id="star-count">12</span> Stars
+        </div>
+
+        <!-- Lecturer Portal Toggle -->
+        <button onclick="showTab('tab-lecturer-info')" id="btn-lecturer-info" class="bg-slate-800 text-white px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-slate-700 transition shadow">
+          <i class="fa-solid fa-graduation-cap text-amber-400"></i>
+          <span>Educator Guide</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full">
+
+    <!-- ================================================================= -->
+    <!-- MODULE 1: WORD EXPLORER (VOCABULARY) -->
+    <!-- ================================================================= -->
+    <div id="tab-word-explorer" class="tab-content space-y-6">
+      
+      <!-- Module Intro Banner -->
+      <div class="bg-gradient-to-r from-amber-400 to-orange-400 rounded-3xl p-6 text-white shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="space-y-2 max-w-xl">
+          <span class="bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30">Module 1 • Vocabulary & Grammar Categories</span>
+          <h2 class="font-heading text-3xl font-bold">Welcome to Word Explorer! 🐶</h2>
+          <p class="text-amber-50 font-medium">Learn new words, collect flashcards, and discover Nouns (Blue), Verbs (Green), and Adjectives (Yellow)!</p>
+        </div>
+        <div class="flex gap-3">
+          <button onclick="filterFlashcards('all')" class="bg-white text-slate-800 font-bold px-4 py-2 rounded-2xl shadow hover:bg-amber-50 text-sm transition">All Words</button>
+          <button onclick="filterFlashcards('noun')" class="bg-blue-500 text-white font-bold px-4 py-2 rounded-2xl shadow hover:bg-blue-600 text-sm transition">Nouns</button>
+          <button onclick="filterFlashcards('verb')" class="bg-emerald-500 text-white font-bold px-4 py-2 rounded-2xl shadow hover:bg-emerald-600 text-sm transition">Verbs</button>
+          <button onclick="filterFlashcards('adj')" class="bg-amber-500 text-white font-bold px-4 py-2 rounded-2xl shadow hover:bg-amber-600 text-sm transition">Adjectives</button>
+        </div>
+      </div>
+
+      <!-- Grammar Category Quick Guide -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-blue-50 border-2 border-blue-200 rounded-2xl p-4 flex items-start gap-3 shadow-sm">
+          <div class="w-10 h-10 bg-blue-500 text-white rounded-xl flex items-center justify-center font-bold text-lg shrink-0">
+            📦
+          </div>
+          <div>
+            <h4 class="font-heading font-bold text-blue-900 text-base">Nouns (Naming Words)</h4>
+            <p class="text-xs text-blue-800 mt-1 leading-relaxed">
+              <strong>Nouns</strong> name a person, animal, place, or thing. <br>
+              <span class="text-blue-600 italic font-semibold">Examples: chef, teacher, dog, cake, fish.</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-4 flex items-start gap-3 shadow-sm">
+          <div class="w-10 h-10 bg-emerald-500 text-white rounded-xl flex items-center justify-center font-bold text-lg shrink-0">
+            🏃
+          </div>
+          <div>
+            <h4 class="font-heading font-bold text-emerald-900 text-base">Verbs (Action Words)</h4>
+            <p class="text-xs text-emerald-800 mt-1 leading-relaxed">
+              <strong>Verbs</strong> tell us what someone or something is doing. <br>
+              <span class="text-emerald-600 italic font-semibold">Examples: runs, eats, kicks, writes, sings.</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 flex items-start gap-3 shadow-sm">
+          <div class="w-10 h-10 bg-amber-500 text-white rounded-xl flex items-center justify-center font-bold text-lg shrink-0">
+            🎨
+          </div>
+          <div>
+            <h4 class="font-heading font-bold text-amber-900 text-base">Adjectives (Describing Words)</h4>
+            <p class="text-xs text-amber-800 mt-1 leading-relaxed">
+              <strong>Adjectives</strong> describe or give more detail about a noun. <br>
+              <span class="text-amber-600 italic font-semibold">Examples: happy, angry, tall, small, tasty.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Flashcards Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="flashcard-grid">
+        <!-- JS dynamically renders interactive cards here -->
+      </div>
+
+      <!-- Interactive Mini Task: Picture-to-Word Matching Game -->
+      <div class="bg-white rounded-3xl p-6 border-2 border-amber-200 shadow-md space-y-4">
+        <div class="flex items-center justify-between border-b pb-4 border-slate-100">
+          <div>
+            <h3 class="font-heading text-xl font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-bullseye text-amber-500"></i> Match the Picture to the Word!
+            </h3>
+            <p class="text-xs text-slate-500">Click a picture on the left, then click its matching word on the right.</p>
+          </div>
+          <button onclick="resetMatchGame()" class="text-xs bg-slate-100 font-bold text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-200">
+            <i class="fa-solid fa-rotate-right mr-1"></i> Reset Game
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-2">
+          <!-- Pictures List -->
+          <div class="grid grid-cols-2 gap-3" id="match-pictures-container">
+            <!-- Rendered by JS -->
+          </div>
+
+          <!-- Words List -->
+          <div class="grid grid-cols-2 gap-3" id="match-words-container">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <div id="match-status" class="hidden p-3 bg-emerald-100 text-emerald-800 rounded-2xl text-center font-bold text-sm border border-emerald-300">
+          🎉 Fantastic job! You matched all the vocabulary cards correctly!
+        </div>
+      </div>
+
+      <!-- Mini Personal Word Bank -->
+      <div class="bg-amber-50 rounded-3xl p-6 border-2 border-amber-200 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="font-heading text-lg font-bold text-amber-900 flex items-center gap-2">
+            <i class="fa-solid fa-book-bookmark text-amber-600"></i> My Personal Word Bank
+          </h3>
+          <span class="text-xs font-bold text-amber-700 bg-amber-200 px-3 py-1 rounded-full" id="word-bank-count">0 words collected</span>
+        </div>
+        <p class="text-xs text-amber-800">Click the star icon <i class="fa-regular fa-star text-amber-500"></i> on any flashcard to add it to your personal word bank!</p>
+        <div id="personal-word-bank-list" class="flex flex-wrap gap-2 pt-2">
+          <span class="text-xs italic text-slate-400">No words saved yet. Star some cards above!</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- MODULE 2: READING RESCUE (DIGITAL PRONUNCIATION SUPPORT) -->
+    <!-- ================================================================= -->
+    <div id="tab-reading-rescue" class="tab-content hidden space-y-6">
+      
+      <!-- Module Banner -->
+      <div class="bg-gradient-to-r from-sky-400 to-blue-500 rounded-3xl p-6 text-white shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="space-y-2 max-w-xl">
+          <span class="bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30">Module 2 • Decoding & Syllable Support</span>
+          <h2 class="font-heading text-3xl font-bold">Reading Rescue 🚑</h2>
+          <p class="text-sky-50 font-medium">Stuck on a tricky word? Break it into syllables, listen to the pronunciation, and read along with short reading strips!</p>
+        </div>
+        <div class="bg-white/10 p-4 rounded-2xl border border-white/20 text-center">
+          <p class="text-xs text-sky-100 font-bold uppercase">Audio Helper Tool</p>
+          <div class="flex items-center gap-2 mt-2">
+            <button onclick="setVoiceSpeed(0.7)" id="btn-speed-slow" class="px-3 py-1 bg-white text-sky-700 font-bold text-xs rounded-xl hover:bg-sky-50">Slow 🐢</button>
+            <button onclick="setVoiceSpeed(1.0)" id="btn-speed-normal" class="px-3 py-1 bg-sky-700 text-white font-bold text-xs rounded-xl hover:bg-sky-600">Normal 🐇</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Syllable Breakdown Interactive Cards -->
+      <div class="bg-white rounded-3xl p-6 border-2 border-sky-100 shadow-md space-y-4">
+        <h3 class="font-heading text-xl font-bold text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-scissors text-sky-500"></i> Syllable Breakdown & Pronunciation Cards
+        </h3>
+        <p class="text-xs text-slate-500">Tap the syllable blocks to hear each sound, then click the speaker to pronounce the whole word!</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2" id="syllable-cards-grid">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+      <!-- Guided Short Reading Strips -->
+      <div class="bg-white rounded-3xl p-6 border-2 border-sky-100 shadow-md space-y-4">
+        <h3 class="font-heading text-xl font-bold text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-layer-group text-sky-500"></i> Guided Reading Strips
+        </h3>
+        <p class="text-xs text-slate-500">Read simple sentences step-by-step. Click the speaker button to hear the sentence read aloud!</p>
+
+        <div class="space-y-4" id="reading-strips-container">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- MODULE 3: SENTENCE BUILDER (WRITING & CONVENTIONS) -->
+    <!-- ================================================================= -->
+    <div id="tab-sentence-builder" class="tab-content hidden space-y-6">
+      
+      <!-- Banner -->
+      <div class="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-3xl p-6 text-white shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="space-y-2 max-w-xl">
+          <span class="bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30">Module 3 • Guided Writing & Syntax</span>
+          <h2 class="font-heading text-3xl font-bold">Sentence Builder 🧩</h2>
+          <p class="text-emerald-50 font-medium">Arrange subject, verb, and object cards to construct correct English sentences, then write them independently!</p>
+        </div>
+        <div class="bg-white/10 p-3 rounded-2xl border border-white/20 flex gap-2">
+          <span class="text-xs bg-blue-500 text-white px-2.5 py-1 rounded-lg font-bold">Subject (Blue)</span>
+          <span class="text-xs bg-emerald-500 text-white px-2.5 py-1 rounded-lg font-bold">Verb (Green)</span>
+          <span class="text-xs bg-amber-500 text-white px-2.5 py-1 rounded-lg font-bold">Object (Yellow)</span>
+        </div>
+      </div>
+
+      <!-- Interactive Sentence Puzzle Container -->
+      <div class="bg-white rounded-3xl p-6 border-2 border-emerald-100 shadow-md space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div>
+            <h3 class="font-heading text-xl font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-puzzle-piece text-emerald-500"></i> Step 1: Arrange the Sentence Cards
+            </h3>
+            <p class="text-xs text-slate-500">Click the jumbled word cards in order to build a complete sentence.</p>
+          </div>
+          <!-- Dynamic Sentence Selector Buttons -->
+          <div class="flex flex-wrap gap-1.5" id="sentence-selectors-container">
+            <!-- Rendered dynamically by JS -->
+          </div>
+        </div>
+
+        <!-- Target Drop Zone -->
+        <div class="bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl p-6 min-h-[90px] flex items-center justify-center gap-3 flex-wrap shadow-inner" id="sentence-dropzone">
+          <span class="text-sm font-bold text-slate-400 italic" id="empty-drop-msg">Click word cards below to put them here...</span>
+        </div>
+
+        <!-- Jumbled Source Cards -->
+        <div class="space-y-2">
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Word Cards Available:</p>
+          <div class="flex flex-wrap gap-3" id="sentence-source-cards">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-between pt-2">
+          <button onclick="clearSentencePuzzle()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition">
+            <i class="fa-solid fa-rotate-left mr-1"></i> Clear Words
+          </button>
+          <button onclick="checkSentencePuzzle()" class="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl text-sm transition shadow-md flex items-center gap-2">
+            <i class="fa-solid fa-circle-check"></i> Check Sentence
+          </button>
+        </div>
+
+        <div id="sentence-feedback" class="hidden p-4 rounded-2xl text-center font-bold text-sm"></div>
+      </div>
+
+      <!-- Step 2: Guided Independent Writing & Checklist Pad -->
+      <div class="bg-white rounded-3xl p-6 border-2 border-emerald-100 shadow-md space-y-6">
+        <div>
+          <h3 class="font-heading text-xl font-bold text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-pen-to-square text-emerald-500"></i> Step 2: Write Your Sentence & Check
+          </h3>
+          <p class="text-xs text-slate-500">Type your arranged sentence into the box below and tick the writing checklist items!</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- Writing Input Area -->
+          <div class="lg:col-span-2 space-y-3">
+            <label class="block text-xs font-bold text-slate-600">Your Sentence:</label>
+            <textarea id="pupil-written-sentence" rows="3" placeholder="Type sentence here... (e.g. The girl eats an apple.)" class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-emerald-500 focus:outline-none font-medium text-lg text-slate-800 shadow-inner"></textarea>
+            
+            <button onclick="verifyWrittenSentence()" class="px-6 py-2.5 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-xl text-sm transition shadow flex items-center gap-2">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Verify Writing Conventions
+            </button>
+            <div id="writing-verification-res" class="hidden p-3 rounded-xl text-xs font-bold"></div>
+          </div>
+
+          <!-- Self-Check Checklist -->
+          <div class="bg-amber-50/60 border-2 border-amber-200 rounded-2xl p-5 space-y-3">
+            <h4 class="font-heading font-bold text-amber-900 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-clipboard-check text-amber-600"></i> Sentence Checklist
+            </h4>
+            <div class="space-y-2 text-xs font-medium text-amber-950">
+              <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-xl border border-amber-200 hover:bg-amber-100/50">
+                <input type="checkbox" id="chk-cap" class="w-4 h-4 text-emerald-600 rounded">
+                <span>1. Capital letter at start (A, B, C...)</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-xl border border-amber-200 hover:bg-amber-100/50">
+                <input type="checkbox" id="chk-space" class="w-4 h-4 text-emerald-600 rounded">
+                <span>2. Finger spaces between words</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-xl border border-amber-200 hover:bg-amber-100/50">
+                <input type="checkbox" id="chk-punc" class="w-4 h-4 text-emerald-600 rounded">
+                <span>3. Full stop at the end (.)</span>
+              </label>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- MODULE 4: DIGITAL LEARNING CORNER (ARCADE, GAMES & SLIDES) -->
+    <!-- ================================================================= -->
+    <div id="tab-digital-corner" class="tab-content hidden space-y-6">
+      
+      <!-- Banner -->
+      <div class="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-3xl p-6 text-white shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="space-y-2 max-w-xl">
+          <span class="bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30">Module 4 • Digital Arcade & Audio Games</span>
+          <h2 class="font-heading text-3xl font-bold">Digital Learning Arcade 🎮</h2>
+          <p class="text-purple-50 font-medium">Reinforce foundational literacy skills through embedded Wordwall-style interactive quizzes, digital slides, and QR audio integration!</p>
+        </div>
+      </div>
+
+      <!-- Game Selector Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Game 1: Word Pop Quiz -->
+        <div class="bg-white border-2 border-purple-100 rounded-3xl p-5 shadow-sm hover:shadow-md transition space-y-3">
+          <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center text-xl font-bold">
+            🎈
+          </div>
+          <h4 class="font-heading text-lg font-bold text-slate-800">Word Category Pop Quiz</h4>
+          <p class="text-xs text-slate-500">Read the word on the screen and decide if it is a Noun, Verb, or Adjective before time runs out!</p>
+          <button onclick="launchArcadeGame('pop')" class="w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-xs shadow transition">Play Game</button>
+        </div>
+
+        <!-- Game 2: Flashcard Memory Match -->
+        <div class="bg-white border-2 border-purple-100 rounded-3xl p-5 shadow-sm hover:shadow-md transition space-y-3">
+          <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center text-xl font-bold">
+            🧠
+          </div>
+          <h4 class="font-heading text-lg font-bold text-slate-800">Memory Card Match</h4>
+          <p class="text-xs text-slate-500">Flip over cards to match pictures with their corresponding English word.</p>
+          <button onclick="launchArcadeGame('memory')" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow transition">Play Game</button>
+        </div>
+
+        <!-- Game 3: Interactive Presentation Slides -->
+        <div class="bg-white border-2 border-purple-100 rounded-3xl p-5 shadow-sm hover:shadow-md transition space-y-3">
+          <div class="w-12 h-12 bg-sky-100 text-sky-600 rounded-2xl flex items-center justify-center text-xl font-bold">
+            📊
+          </div>
+          <h4 class="font-heading text-lg font-bold text-slate-800">Grammar Slide Deck</h4>
+          <p class="text-xs text-slate-500">View teacher's guided grammar slides on Nouns, Verbs, and Sentence structures.</p>
+          <button onclick="launchArcadeGame('slides')" class="w-full py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl font-bold text-xs shadow transition">Open Slide Deck</button>
+        </div>
+
+      </div>
+
+      <!-- Custom External Teacher Links Section -->
+      <div class="bg-white rounded-3xl p-6 border-2 border-purple-200 shadow-md space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <div>
+            <h3 class="font-heading text-xl font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-link text-purple-600"></i> Teacher Custom Links & Online Resources
+            </h3>
+            <p class="text-xs text-slate-500">Add your own Wordwall games, Kahoot quizzes, Google Slides, or YouTube links for pupils to access easily!</p>
+          </div>
+          <button onclick="toggleAddLinkForm()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl transition shadow flex items-center gap-1.5">
+            <i class="fa-solid fa-plus"></i> Add Custom Link
+          </button>
+        </div>
+
+        <!-- Add Link Form Modal/Drawer -->
+        <div id="add-link-form" class="hidden bg-purple-50 p-4 rounded-2xl border border-purple-200 space-y-3">
+          <h4 class="font-bold text-xs text-purple-900 uppercase tracking-wider">Add New Educational Link</h4>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <input type="text" id="link-title" placeholder="Resource Title (e.g. Action Verbs Wordwall)" class="p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-purple-500">
+            <input type="url" id="link-url" placeholder="URL (e.g. https://wordwall.net/play/12345)" class="p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-purple-500">
+            <select id="link-type" class="p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-purple-500">
+              <option value="wordwall">Wordwall Game 🎮</option>
+              <option value="kahoot">Kahoot Quiz 🎯</option>
+              <option value="slides">Google Slides 📊</option>
+              <option value="youtube">YouTube Video 🎬</option>
+              <option value="other">Other Link 🔗</option>
+            </select>
+          </div>
+          <div class="flex justify-end gap-2 pt-1">
+            <button onclick="toggleAddLinkForm()" class="px-3 py-1.5 bg-slate-200 text-slate-700 font-bold text-xs rounded-xl">Cancel</button>
+            <button onclick="saveCustomLink()" class="px-4 py-1.5 bg-purple-600 text-white font-bold text-xs rounded-xl shadow hover:bg-purple-700">Save Link</button>
+          </div>
+        </div>
+
+        <!-- Links Grid Display -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="custom-links-grid">
+          <!-- Dynamically populated via JS -->
+        </div>
+      </div>
+
+      <!-- Arcade Game Active Display Container -->
+      <div id="arcade-active-container" class="bg-white rounded-3xl p-6 border-2 border-purple-200 shadow-md space-y-4">
+        <div id="arcade-game-view">
+          <!-- JS dynamic game viewport loaded here -->
+        </div>
+      </div>
+
+      <!-- Digital QR Code Linking Bridge -->
+      <div class="bg-slate-900 text-white rounded-3xl p-6 shadow-md space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div>
+            <h3 class="font-heading text-lg font-bold text-amber-400 flex items-center gap-2">
+              <i class="fa-solid fa-qrcode"></i> Integrated Physical Kit QR Code Bridge
+            </h3>
+            <p class="text-xs text-slate-400">These simulated QR codes are printed on physical cards in the LitKit box to directly open each module on pupils' tablets/phones.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center pt-2">
+          
+          <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 space-y-2 flex flex-col items-center">
+            <div class="bg-white p-2 rounded-xl">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://litkit.edu/explorer" alt="QR Code Word Explorer" class="w-20 h-20" onerror="this.src='https://placehold.co/100x100/ffffff/000000?text=QR+Word'"/>
+            </div>
+            <p class="text-xs font-bold text-slate-300">Word Explorer</p>
+          </div>
+
+          <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 space-y-2 flex flex-col items-center">
+            <div class="bg-white p-2 rounded-xl">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://litkit.edu/reading" alt="QR Code Reading Rescue" class="w-20 h-20" onerror="this.src='https://placehold.co/100x100/ffffff/000000?text=QR+Reading'"/>
+            </div>
+            <p class="text-xs font-bold text-slate-300">Reading Rescue</p>
+          </div>
+
+          <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 space-y-2 flex flex-col items-center">
+            <div class="bg-white p-2 rounded-xl">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://litkit.edu/sentence" alt="QR Code Sentence Builder" class="w-20 h-20" onerror="this.src='https://placehold.co/100x100/ffffff/000000?text=QR+Sentence'"/>
+            </div>
+            <p class="text-xs font-bold text-slate-300">Sentence Builder</p>
+          </div>
+
+          <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 space-y-2 flex flex-col items-center">
+            <div class="bg-white p-2 rounded-xl">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://litkit.edu/arcade" alt="QR Code Fun Arcade" class="w-20 h-20" onerror="this.src='https://placehold.co/100x100/ffffff/000000?text=QR+Arcade'"/>
+            </div>
+            <p class="text-xs font-bold text-slate-300">Digital Arcade</p>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- PRINTABLE WORKSHEETS GENERATOR -->
+    <!-- ================================================================= -->
+    <div id="tab-worksheets" class="tab-content hidden space-y-6">
+      
+      <div class="bg-gradient-to-r from-rose-500 to-pink-600 rounded-3xl p-6 text-white shadow-lg flex flex-col md:flex-row items-center justify-between gap-6 no-print">
+        <div class="space-y-2 max-w-xl">
+          <span class="bg-white/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-white/30">Offline Support • Downloadable Worksheets</span>
+          <h2 class="font-heading text-3xl font-bold">Printable Activity Sheets 🖨️</h2>
+          <p class="text-rose-50 font-medium">Generate clean, beautifully formatted PDF worksheets directly from the website for pen-and-paper classroom activities!</p>
+        </div>
+        <button onclick="window.print()" class="bg-white text-rose-700 px-6 py-3 rounded-2xl font-bold text-sm shadow hover:bg-rose-50 transition flex items-center gap-2">
+          <i class="fa-solid fa-print"></i> Print Current Worksheet
+        </button>
+      </div>
+
+      <!-- Select Worksheet Template -->
+      <div class="flex gap-3 no-print">
+        <button onclick="loadWorksheet('matching')" class="px-4 py-2 bg-white border border-slate-200 font-bold text-xs rounded-xl hover:bg-slate-50 text-slate-700">Sheet A: Picture-Word Match</button>
+        <button onclick="loadWorksheet('sentence')" class="px-4 py-2 bg-white border border-slate-200 font-bold text-xs rounded-xl hover:bg-slate-50 text-slate-700">Sheet B: Sentence Writing</button>
+      </div>
+
+      <!-- Printable Document Output Area -->
+      <div id="printable-area" class="bg-white p-8 rounded-3xl border-2 border-slate-200 shadow-md text-slate-900 space-y-6 max-w-4xl mx-auto">
+        <!-- Rendered dynamically -->
+      </div>
+
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- LECTURER & EDUCATOR BRIEFING / PEDAGOGICAL SHOWCASE -->
+    <!-- ================================================================= -->
+    <div id="tab-lecturer-info" class="tab-content hidden space-y-8">
+      
+      <!-- Top Overview Card -->
+      <div class="bg-slate-900 text-white rounded-3xl p-8 shadow-xl border border-slate-800 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <span class="bg-amber-400 text-slate-950 text-xs font-bold uppercase px-3 py-1 rounded-full">Pedagogical Showcase & Kit Overview</span>
+            <h2 class="font-heading text-3xl font-bold text-white mt-2">LitKit: Modular English Literacy Learning Innovation</h2>
+            <p class="text-sm text-slate-400">Designed for Year 3 Pupils with Low English Proficiency</p>
+          </div>
+          <div class="bg-slate-800 p-3 rounded-2xl border border-slate-700 text-right">
+            <p class="text-xs text-amber-400 font-bold">Primary Target Skill</p>
+            <p class="text-lg font-bold text-white">Writing & Decoding</p>
+          </div>
+        </div>
+
+        <!-- 3 Core Pillars -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+          <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60 space-y-2">
+            <div class="text-amber-400 text-lg font-bold flex items-center gap-2">
+              <i class="fa-solid fa-triangle-exclamation"></i> Core Problem
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Year 3 low-proficiency pupils have restricted vocabulary, struggle with basic grammatical word categories (nouns/verbs/adjectives), and experience difficulty sounding out unfamiliar words to compose simple sentences.
+            </p>
+          </div>
+
+          <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60 space-y-2">
+            <div class="text-emerald-400 text-lg font-bold flex items-center gap-2">
+              <i class="fa-solid fa-lightbulb"></i> Main Innovation
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              A modular learning kit organizing physical hands-on components and web-based audio-visual activities into a scaffolded, progressive learning pathway with self-correction feedback.
+            </p>
+          </div>
+
+          <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/60 space-y-2">
+            <div class="text-sky-400 text-lg font-bold flex items-center gap-2">
+              <i class="fa-solid fa-cubes"></i> Physical-Digital Integration
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Physical cards and sentence strips are seamlessly paired with QR code web shortcuts, TTS audio models, and digital self-checking writing tools to prevent cognitive overload.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- About the Author / Innovator Section -->
+      <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-md space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+          <h3 class="font-heading text-2xl font-bold text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-user-gear text-emerald-600"></i> About the Author & Innovator
+          </h3>
+          <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full border border-emerald-200">Teacher Hafiz</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+          <!-- Innovator Portrait Card -->
+          <div class="bg-gradient-to-b from-emerald-50 to-teal-100 p-6 rounded-3xl border border-emerald-200 flex flex-col items-center text-center space-y-3 shadow-sm">
+            <div class="w-28 h-28 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-5xl shadow-md border-4 border-white overflow-hidden relative">
+              <i class="fa-solid fa-user-tie"></i>
+            </div>
+            <div>
+              <h4 class="font-heading font-bold text-xl text-emerald-950">TEACHER HAFIZ</h4>
+              <p class="text-xs font-bold text-emerald-700 uppercase tracking-wider">Kit Author & TESL Innovator</p>
+            </div>
+            <span class="px-3 py-1 bg-white text-emerald-800 text-xs font-bold rounded-xl shadow-sm border border-emerald-200">
+              PISMP TESL D 2023–2028
+            </span>
+          </div>
+
+          <!-- Profile & Philosophy Info -->
+          <div class="md:col-span-2 space-y-4">
+            <div class="space-y-1">
+              <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Name</p>
+              <p class="text-lg font-bold text-slate-800">Muhammad Hafizuddin Bin Abdur Haman</p>
+            </div>
+
+            <div class="space-y-1">
+              <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Program / Course</p>
+              <p class="text-sm font-bold text-emerald-700 bg-emerald-50 px-3.5 py-1.5 rounded-xl inline-block border border-emerald-200">
+                PISMP TESL D 2023–2028
+              </p>
+            </div>
+
+            <div class="bg-amber-50/80 border-l-4 border-amber-400 p-4 rounded-r-2xl space-y-1.5 shadow-sm">
+              <p class="text-xs font-bold text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-quote-left text-amber-500"></i> Teaching Philosophy
+              </p>
+              <p class="text-xs md:text-sm italic font-medium text-amber-950 leading-relaxed">
+                "I believe that every pupil can succeed in the English language classroom when provided with the right scaffolds. My goal is to create engaging, inclusive, and visually supportive materials that turn language anxiety into language confidence."
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Breakdown Matrix -->
+      <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-md space-y-6">
+        <h3 class="font-heading text-2xl font-bold text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-sitemap text-amber-500"></i> Kit Modules Architecture & Pedagogical Flow
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <!-- Module 1 Brief -->
+          <div class="p-5 border-2 border-amber-100 rounded-2xl bg-amber-50/30 space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold text-amber-900 text-base flex items-center gap-2">
+                <i class="fa-solid fa-magnifying-glass text-amber-600"></i> 1. Word Explorer (Vocabulary)
+              </h4>
+              <span class="text-[10px] bg-amber-200 text-amber-900 font-bold px-2.5 py-0.5 rounded-full">Foundation Stage</span>
+            </div>
+            <p class="text-xs text-slate-600">
+              <strong>Focus:</strong> Overcoming limited vocabulary and word category confusion.
+            </p>
+            <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
+              <li>Colour-coded cards: Nouns (Blue), Verbs (Green), Adjectives (Yellow).</li>
+              <li>Picture-to-word matching tasks with tactile flashcards.</li>
+              <li>Personal Word Bank generator for self-directed vocabulary building.</li>
+            </ul>
+          </div>
+
+          <!-- Module 2 Brief -->
+          <div class="p-5 border-2 border-sky-100 rounded-2xl bg-sky-50/30 space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold text-sky-900 text-base flex items-center gap-2">
+                <i class="fa-solid fa-life-ring text-sky-600"></i> 2. Reading Rescue (Phonics & Audio)
+              </h4>
+              <span class="text-[10px] bg-sky-200 text-sky-900 font-bold px-2.5 py-0.5 rounded-full">Decoding Stage</span>
+            </div>
+            <p class="text-xs text-slate-600">
+              <strong>Focus:</strong> Decoding unfamiliar words and correct pronunciation support.
+            </p>
+            <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
+              <li>Syllable breakdown cards (e.g. <i>rab - bit</i>).</li>
+              <li>Web Speech API synthesized voice playback with speed control (slow/normal).</li>
+              <li>Guided short reading strips bridging single words to connected text.</li>
+            </ul>
+          </div>
+
+          <!-- Module 3 Brief -->
+          <div class="p-5 border-2 border-emerald-100 rounded-2xl bg-emerald-50/30 space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold text-emerald-900 text-base flex items-center gap-2">
+                <i class="fa-solid fa-puzzle-piece text-emerald-600"></i> 3. Sentence Builder (Writing)
+              </h4>
+              <span class="text-[10px] bg-emerald-200 text-emerald-900 font-bold px-2.5 py-0.5 rounded-full">Application Stage</span>
+            </div>
+            <p class="text-xs text-slate-600">
+              <strong>Focus:</strong> Sentence construction and basic writing conventions.
+            </p>
+            <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
+              <li>Subject + Verb + Object physical and digital sentence arrangement.</li>
+              <li>3-point writing convention checklist (Capitalisation, Spacing, Punctuation).</li>
+              <li>Scaffolded transition from card arrangement to independent sentence writing.</li>
+            </ul>
+          </div>
+
+          <!-- Module 4 Brief -->
+          <div class="p-5 border-2 border-purple-100 rounded-2xl bg-purple-50/30 space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold text-purple-900 text-base flex items-center gap-2">
+                <i class="fa-solid fa-gamepad text-purple-600"></i> 4. Digital Corner & Arcade
+              </h4>
+              <span class="text-[10px] bg-purple-200 text-purple-900 font-bold px-2.5 py-0.5 rounded-full">Reinforcement Stage</span>
+            </div>
+            <p class="text-xs text-slate-600">
+              <strong>Focus:</strong> Repeated practice, motivation, and multi-modal reinforcement.
+            </p>
+            <ul class="text-xs text-slate-600 space-y-1 list-disc pl-4">
+              <li>Integrated interactive Wordwall-style arcade games.</li>
+              <li>Digital grammar presentation slides for whole-class teaching.</li>
+              <li>Tested QR code linkages connecting physical kit cards to web apps.</li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Differentiation & Research Alignment -->
+      <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-md space-y-4">
+        <h3 class="font-heading text-xl font-bold text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-sliders text-amber-500"></i> Three Levels of Differentiated Support
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+            <span class="px-2.5 py-1 bg-amber-100 text-amber-800 font-bold text-xs rounded-lg">Level 1: Novice</span>
+            <h5 class="font-bold text-sm text-slate-800">Picture Matching</h5>
+            <p class="text-xs text-slate-500">For pupils requiring high visual support. Focuses on matching picture prompts to printed words with single-syllable audio models.</p>
+          </div>
+
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+            <span class="px-2.5 py-1 bg-sky-100 text-sky-800 font-bold text-xs rounded-lg">Level 2: Developing</span>
+            <h5 class="font-bold text-sm text-slate-800">Guided Word Arrangement</h5>
+            <p class="text-xs text-slate-500">For pupils learning sentence structure. Uses colour-coded Subject-Verb-Object blocks to build complete thoughts.</p>
+          </div>
+
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+            <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 font-bold text-xs rounded-lg">Level 3: Advanced</span>
+            <h5 class="font-bold text-sm text-slate-800">Independent Sentence Writing</h5>
+            <p class="text-xs text-slate-500">For pupils ready for challenge. Prompts independent writing with self-correction against capital letters, spacing, and full stops.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-400 no-print">
+    <p>LitKit Innovation Project • Primary English Language Teaching & Learning Materials</p>
+    <p class="mt-1">Designed for Year 3 English Literacy Intervention</p>
+  </footer>
+
+  <!-- JS LOGIC & APPLICATION STATE -->
+  <script>
+    // State Variables
+    let userStars = 12;
+    let personalWordBank = new Set(['dog', 'eats', 'happy']);
+    let speechSpeed = 1.0;
+    let currentPuzzleIndex = 0;
+    let selectedPuzzleWords = [];
+
+    let customTeacherLinks = [
+      { id: '1', title: 'Action Verbs Wordwall', url: 'https://wordwall.net', type: 'wordwall', icon: '🎮' },
+      { id: '2', title: 'Nouns & Adjectives Kahoot', url: 'https://kahoot.it', type: 'kahoot', icon: '🎯' }
+    ];
+
+    // Core Vocabulary Dataset
+    const vocabularyList = [
+      { id: 'dog', word: 'dog', category: 'noun', icon: '🐶', example: 'The dog barks.', syllables: ['dog'] },
+      { id: 'girl', word: 'girl', category: 'noun', icon: '👧', example: 'The girl smiles.', syllables: ['girl'] },
+      { id: 'apple', word: 'apple', category: 'noun', icon: '🍎', example: 'An apple is sweet.', syllables: ['ap', 'ple'] },
+      { id: 'rabbit', word: 'rabbit', category: 'noun', icon: '🐰', example: 'The rabbit hops.', syllables: ['rab', 'bit'] },
+      { id: 'chef', word: 'chef', category: 'noun', icon: '👨‍🍳', example: 'The chef cooks food.', syllables: ['chef'] },
+      { id: 'teacher', word: 'teacher', category: 'noun', icon: '👩‍🏫', example: 'The teacher reads.', syllables: ['tea', 'cher'] },
+      { id: 'man', word: 'man', category: 'noun', icon: '👨', example: 'The man walks.', syllables: ['man'] },
+      { id: 'boy', word: 'boy', category: 'noun', icon: '👦', example: 'The boy plays.', syllables: ['boy'] },
+      { id: 'cake', word: 'cake', category: 'noun', icon: '🍰', example: 'A sweet cake.', syllables: ['cake'] },
+      { id: 'fish', word: 'fish', category: 'noun', icon: '🐟', example: 'The fish swims.', syllables: ['fish'] },
+      { id: 'fruit', word: 'fruit', category: 'noun', icon: '🍇', example: 'Fresh fruit is good.', syllables: ['fruit'] },
+      { id: 'chocolate', word: 'chocolate', category: 'noun', icon: '🍫', example: 'Tasty chocolate.', syllables: ['choc', 'o', 'late'] },
+      { id: 'bread', word: 'bread', category: 'noun', icon: '🍞', example: 'Fresh bread.', syllables: ['bread'] },
+      { id: 'chicken', word: 'chicken', category: 'noun', icon: '🐔', example: 'The chicken pecks.', syllables: ['chick', 'en'] },
+      { id: 'cat', word: 'cat', category: 'noun', icon: '🐱', example: 'The cat sleeps.', syllables: ['cat'] },
+
+      { id: 'eats', word: 'eats', category: 'verb', icon: '🍽️', example: 'She eats food.', syllables: ['eats'] },
+      { id: 'runs', word: 'runs', category: 'verb', icon: '🏃', example: 'He runs fast.', syllables: ['runs'] },
+      { id: 'jumps', word: 'jumps', category: 'verb', icon: '🦘', example: 'It jumps high.', syllables: ['jumps'] },
+      { id: 'cooks', word: 'cooks', category: 'verb', icon: '🍳', example: 'The chef cooks.', syllables: ['cooks'] },
+      { id: 'reads', word: 'reads', category: 'verb', icon: '📖', example: 'She reads a book.', syllables: ['reads'] },
+      { id: 'kicks', word: 'kicks', category: 'verb', icon: '⚽', example: 'He kicks the ball.', syllables: ['kicks'] },
+      { id: 'punch', word: 'punch', category: 'verb', icon: '🥊', example: 'Punch the bag.', syllables: ['punch'] },
+      { id: 'writes', word: 'writes', category: 'verb', icon: '✍️', example: 'He writes letters.', syllables: ['writes'] },
+      { id: 'sings', word: 'sings', category: 'verb', icon: '🎤', example: 'She sings well.', syllables: ['sings'] },
+
+      { id: 'happy', word: 'happy', category: 'adj', icon: '😊', example: 'A happy child.', syllables: ['hap', 'py'] },
+      { id: 'mad', word: 'mad', category: 'adj', icon: '😠', example: 'A mad face.', syllables: ['mad'] },
+      { id: 'angry', word: 'angry', category: 'adj', icon: '😡', example: 'An angry dog.', syllables: ['an', 'gry'] },
+      { id: 'small', word: 'small', category: 'adj', icon: '🐭', example: 'A small cat.', syllables: ['small'] },
+      { id: 'tall', word: 'tall', category: 'adj', icon: '🦒', example: 'A tall man.', syllables: ['tall'] },
+      { id: 'long', word: 'long', category: 'adj', icon: '🐍', example: 'A long story.', syllables: ['long'] },
+      { id: 'short', word: 'short', category: 'adj', icon: '📏', example: 'A short letter.', syllables: ['short'] }
+    ];
+
+    // Expanded Sentence Puzzle Dataset (10 Practice Sentences)
+    const sentencePuzzles = [
+      {
+        parts: [
+          { text: "eats", type: "verb" },
+          { text: "The girl", type: "noun" },
+          { text: "an apple.", type: "adj" }
+        ],
+        correctOrder: ["The girl", "eats", "an apple."]
+      },
+      {
+        parts: [
+          { text: "runs", type: "verb" },
+          { text: "fast.", type: "adj" },
+          { text: "The dog", type: "noun" }
+        ],
+        correctOrder: ["The dog", "runs", "fast."]
+      },
+      {
+        parts: [
+          { text: "jumps", type: "verb" },
+          { text: "A happy rabbit", type: "noun" },
+          { text: "high.", type: "adj" }
+        ],
+        correctOrder: ["A happy rabbit", "jumps", "high."]
+      },
+      {
+        parts: [
+          { text: "The chef", type: "noun" },
+          { text: "tasty bread.", type: "adj" },
+          { text: "cooks", type: "verb" }
+        ],
+        correctOrder: ["The chef", "cooks", "tasty bread."]
+      },
+      {
+        parts: [
+          { text: "reads", type: "verb" },
+          { text: "The teacher", type: "noun" },
+          { text: "a long story.", type: "adj" }
+        ],
+        correctOrder: ["The teacher", "reads", "a long story."]
+      },
+      {
+        parts: [
+          { text: "kicks", type: "verb" },
+          { text: "the ball.", type: "adj" },
+          { text: "The angry boy", type: "noun" }
+        ],
+        correctOrder: ["The angry boy", "kicks", "the ball."]
+      },
+      {
+        parts: [
+          { text: "drinks", type: "verb" },
+          { text: "A small cat", type: "noun" },
+          { text: "cold milk.", type: "adj" }
+        ],
+        correctOrder: ["A small cat", "drinks", "cold milk."]
+      },
+      {
+        parts: [
+          { text: "writes", type: "verb" },
+          { text: "The tall man", type: "noun" },
+          { text: "a short letter.", type: "adj" }
+        ],
+        correctOrder: ["The tall man", "writes", "a short letter."]
+      },
+      {
+        parts: [
+          { text: "sings", type: "verb" },
+          { text: "The happy girl", type: "noun" },
+          { text: "a sweet song.", type: "adj" }
+        ],
+        correctOrder: ["The happy girl", "sings", "a sweet song."]
+      },
+      {
+        parts: [
+          { text: "pecks", type: "verb" },
+          { text: "The hungry chicken", type: "noun" },
+          { text: "fresh fruit.", type: "adj" }
+        ],
+        correctOrder: ["The hungry chicken", "pecks", "fresh fruit."]
+      }
+    ];
+
+    function renderSentenceSelectorButtons() {
+      const container = document.getElementById('sentence-selectors-container');
+      if(!container) return;
+
+      container.innerHTML = '';
+      sentencePuzzles.forEach((_, idx) => {
+        const isActive = idx === currentPuzzleIndex;
+        const activeClass = isActive 
+          ? "bg-emerald-500 text-white shadow-sm" 
+          : "bg-emerald-100 text-emerald-800 hover:bg-emerald-200";
+
+        container.innerHTML += `
+          <button onclick="loadSentencePuzzle(${idx})" class="text-xs font-bold px-2.5 py-1 rounded-lg transition ${activeClass}">
+            S${idx + 1}
+          </button>
+        `;
+      });
+    }
+
+    function renderCustomLinks() {
+      const container = document.getElementById('custom-links-grid');
+      if(!container) return;
+      container.innerHTML = '';
+      if(customTeacherLinks.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 italic col-span-full">No custom links added yet. Click "Add Custom Link" above to add your own resources!</p>`;
+        return;
+      }
+      customTeacherLinks.forEach((link, idx) => {
+        container.innerHTML += `
+          <div class="bg-purple-50 p-4 rounded-2xl border border-purple-200 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 overflow-hidden">
+              <span class="text-2xl shrink-0">${link.icon}</span>
+              <div class="truncate">
+                <h5 class="font-bold text-sm text-slate-800 truncate">${link.title}</h5>
+                <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="text-xs text-purple-600 hover:underline truncate block">${link.url}</a>
+              </div>
+            </div>
+            <button onclick="removeCustomLink(${idx})" class="text-rose-500 hover:text-rose-700 p-1 shrink-0" title="Remove Link">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        `;
+      });
+    }
+
+    function toggleAddLinkForm() {
+      const form = document.getElementById('add-link-form');
+      if(form) form.classList.toggle('hidden');
+    }
+
+    function saveCustomLink() {
+      const title = document.getElementById('link-title').value.trim();
+      const url = document.getElementById('link-url').value.trim();
+      const type = document.getElementById('link-type').value;
+
+      if(!title || !url) {
+        alert('Please enter both a title and a valid URL!');
+        return;
+      }
+
+      let icon = '🔗';
+      if(type === 'wordwall') icon = '🎮';
+      if(type === 'kahoot') icon = '🎯';
+      if(type === 'slides') icon = '📊';
+      if(type === 'youtube') icon = '🎬';
+
+      customTeacherLinks.push({
+        id: Date.now().toString(),
+        title,
+        url,
+        type,
+        icon
+      });
+
+      // Clear inputs
+      document.getElementById('link-title').value = '';
+      document.getElementById('link-url').value = '';
+      toggleAddLinkForm();
+      renderCustomLinks();
+    }
+
+    function removeCustomLink(index) {
+      customTeacherLinks.splice(index, 1);
+      renderCustomLinks();
+    }
+
+    // Tab Navigation Switcher
+    function showTab(tabId) {
+      // Hide all contents
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      
+      // Reset navigation button states
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('border-amber-300', 'bg-amber-100', 'border-sky-300', 'bg-sky-100', 'border-emerald-300', 'bg-emerald-100', 'border-purple-300', 'bg-purple-100', 'border-rose-300', 'bg-rose-100');
+        btn.classList.add('border-transparent');
+      });
+
+      // Show selected tab content
+      const target = document.getElementById(tabId);
+      if (target) {
+        target.classList.remove('hidden');
+      }
+
+      // Highlight active button
+      const activeBtn = document.getElementById('btn-' + tabId.replace('tab-', ''));
+      if (activeBtn) {
+        activeBtn.classList.remove('border-transparent');
+        activeBtn.classList.add('border-2');
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Audio Speech Synthesis Helper
+    function speakWord(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel(); // Stop current speech
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = speechSpeed;
+        window.speechSynthesis.speak(utterance);
+      } else {
+        alert("Audio playback supported in modern browsers!");
+      }
+    }
+
+    function setVoiceSpeed(speed) {
+      speechSpeed = speed;
+      document.getElementById('btn-speed-slow').className = speed === 0.7 
+        ? "px-3 py-1 bg-sky-700 text-white font-bold text-xs rounded-xl"
+        : "px-3 py-1 bg-white text-sky-700 font-bold text-xs rounded-xl";
+      document.getElementById('btn-speed-normal').className = speed === 1.0 
+        ? "px-3 py-1 bg-sky-700 text-white font-bold text-xs rounded-xl"
+        : "px-3 py-1 bg-white text-sky-700 font-bold text-xs rounded-xl";
+    }
+
+    function renderFlashcards(filter = 'all') {
+      const container = document.getElementById('flashcard-grid');
+      container.innerHTML = '';
+
+      const items = filter === 'all' 
+        ? vocabularyList 
+        : vocabularyList.filter(item => item.category === filter);
+
+      items.forEach(item => {
+        const isStarred = personalWordBank.has(item.id);
+        
+        let badgeBg = 'bg-blue-500';
+        if(item.category === 'verb') badgeBg = 'bg-emerald-500';
+        if(item.category === 'adj') badgeBg = 'bg-amber-500';
+
+        const cardHtml = `
+          <div class="bg-white rounded-3xl p-4 border-2 border-slate-100 shadow-md hover:shadow-lg transition space-y-3 relative flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="${badgeBg} text-white font-bold text-[10px] uppercase px-2.5 py-0.5 rounded-full tracking-wider">${item.category}</span>
+              <button onclick="toggleWordBank('${item.id}')" class="text-amber-400 text-lg hover:scale-125 transition">
+                <i class="${isStarred ? 'fa-solid' : 'fa-regular'} fa-star"></i>
+              </button>
+            </div>
+
+            <div class="text-center space-y-2 py-2">
+              <div class="text-5xl my-2">${item.icon}</div>
+              <h4 class="font-heading text-2xl font-bold text-slate-800 capitalize">${item.word}</h4>
+              <p class="text-xs text-slate-500 italic bg-slate-50 p-2 rounded-xl">"${item.example}"</p>
+            </div>
+
+            <button onclick="speakWord('${item.word}')" class="w-full py-2 bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-xs rounded-2xl flex items-center justify-center gap-2 transition">
+              <i class="fa-solid fa-volume-high text-amber-600"></i> Listen Audio
+            </button>
+          </div>
+        `;
+        container.innerHTML += cardHtml;
+      });
+    }
+
+    function filterFlashcards(category) {
+      renderFlashcards(category);
+    }
+
+    function toggleWordBank(wordId) {
+      if(personalWordBank.has(wordId)) {
+        personalWordBank.delete(wordId);
+      } else {
+        personalWordBank.add(wordId);
+        triggerConfetti();
+      }
+      renderFlashcards();
+      renderPersonalWordBank();
+    }
+
+    function renderPersonalWordBank() {
+      const container = document.getElementById('personal-word-bank-list');
+      const countEl = document.getElementById('word-bank-count');
+      
+      countEl.innerText = `${personalWordBank.size} words saved`;
+      if(personalWordBank.size === 0) {
+        container.innerHTML = `<span class="text-xs italic text-slate-400">No words saved yet. Star some cards above!</span>`;
+        return;
+      }
+
+      container.innerHTML = '';
+      personalWordBank.forEach(wordId => {
+        const wordObj = vocabularyList.find(v => v.id === wordId);
+        if(wordObj) {
+          container.innerHTML += `
+            <span class="bg-amber-200 text-amber-900 px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-2 shadow-sm">
+              <span>${wordObj.icon} ${wordObj.word}</span>
+              <i onclick="speakWord('${wordObj.word}')" class="fa-solid fa-volume-high text-amber-700 cursor-pointer"></i>
+            </span>
+          `;
+        }
+      });
+    }
+
+    let selectedPic = null;
+    let selectedWord = null;
+    let matchedPairs = 0;
+
+    function renderMatchGame() {
+      const picsContainer = document.getElementById('match-pictures-container');
+      const wordsContainer = document.getElementById('match-words-container');
+
+      picsContainer.innerHTML = '';
+      wordsContainer.innerHTML = '';
+      matchedPairs = 0;
+
+      // Pick 4 items for game
+      const sample = vocabularyList.slice(0, 4);
+      const shuffledWords = [...sample].sort(() => Math.random() - 0.5);
+
+      sample.forEach(item => {
+        picsContainer.innerHTML += `
+          <button id="pic-btn-${item.id}" onclick="selectMatchItem('pic', '${item.id}')" class="p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1 hover:border-amber-400 transition">
+            <span class="text-4xl">${item.icon}</span>
+          </button>
+        `;
+      });
+
+      shuffledWords.forEach(item => {
+        wordsContainer.innerHTML += `
+          <button id="word-btn-${item.id}" onclick="selectMatchItem('word', '${item.id}')" class="p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl font-heading font-bold text-lg text-slate-800 hover:border-amber-400 transition">
+            ${item.word}
+          </button>
+        `;
+      });
+    }
+
+    function selectMatchItem(type, id) {
+      if(type === 'pic') {
+        selectedPic = id;
+        document.querySelectorAll('#match-pictures-container button').forEach(b => b.classList.remove('border-amber-500', 'bg-amber-50'));
+        document.getElementById(`pic-btn-${id}`).classList.add('border-amber-500', 'bg-amber-50');
+      } else {
+        selectedWord = id;
+        document.querySelectorAll('#match-words-container button').forEach(b => b.classList.remove('border-amber-500', 'bg-amber-50'));
+        document.getElementById(`word-btn-${id}`).classList.add('border-amber-500', 'bg-amber-50');
+      }
+
+      if(selectedPic && selectedWord) {
+        if(selectedPic === selectedWord) {
+          // Match!
+          document.getElementById(`pic-btn-${selectedPic}`).className = "p-4 bg-emerald-100 border-2 border-emerald-500 rounded-2xl text-emerald-800 opacity-60 cursor-not-allowed";
+          document.getElementById(`word-btn-${selectedWord}`).className = "p-4 bg-emerald-100 border-2 border-emerald-500 rounded-2xl font-heading font-bold text-lg text-emerald-800 opacity-60 cursor-not-allowed";
+          matchedPairs++;
+          speakWord(selectedWord);
+          
+          if(matchedPairs === 4) {
+            document.getElementById('match-status').classList.remove('hidden');
+            triggerConfetti();
+            addStars(3);
+          }
+        } else {
+          // Wrong match reset
+          setTimeout(() => {
+            document.querySelectorAll('#match-pictures-container button, #match-words-container button').forEach(b => {
+              if(!b.classList.contains('bg-emerald-100')) {
+                b.classList.remove('border-amber-500', 'bg-amber-50');
+              }
+            });
+          }, 500);
+        }
+        selectedPic = null;
+        selectedWord = null;
+      }
+    }
+
+    function resetMatchGame() {
+      document.getElementById('match-status').classList.add('hidden');
+      renderMatchGame();
+    }
+
+    function renderSyllableCards() {
+      const container = document.getElementById('syllable-cards-grid');
+      container.innerHTML = '';
+
+      vocabularyList.forEach(item => {
+        const syllableHtml = item.syllables.map(syl => `
+          <span onclick="speakWord('${syl}')" class="px-3 py-2 bg-sky-100 text-sky-900 border border-sky-300 rounded-xl font-bold text-sm hover:bg-sky-200 cursor-pointer transition">
+            ${syl}
+          </span>
+        `).join('<span class="text-slate-300 font-bold text-xs">•</span>');
+
+        container.innerHTML += `
+          <div class="p-4 bg-sky-50/50 rounded-2xl border border-sky-200 space-y-3 flex flex-col justify-between">
+            <div class="flex items-center gap-3">
+              <span class="text-3xl">${item.icon}</span>
+              <div>
+                <h4 class="font-heading font-bold text-lg text-slate-800">${item.word}</h4>
+                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">${item.syllables.length} Syllable(s)</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-1 flex-wrap py-1">
+              ${syllableHtml}
+            </div>
+
+            <button onclick="speakWord('${item.word}')" class="w-full py-2 bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow-sm transition">
+              <i class="fa-solid fa-volume-high"></i> Listen Full Word
+            </button>
+          </div>
+        `;
+      });
+    }
+
+    function renderReadingStrips() {
+      const container = document.getElementById('reading-strips-container');
+      const strips = [
+        { text: "The happy rabbit jumps high.", icon: "🐰" },
+        { text: "The girl eats a big red apple.", icon: "🍎" },
+        { text: "A dog runs in the garden.", icon: "🐶" }
+      ];
+
+      container.innerHTML = '';
+      strips.forEach(strip => {
+        container.innerHTML += `
+          <div class="p-4 bg-slate-50 rounded-2xl border-2 border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <span class="text-3xl">${strip.icon}</span>
+              <p class="font-heading text-lg font-bold text-slate-800">${strip.text}</p>
+            </div>
+            <button onclick="speakWord('${strip.text}')" class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-xl text-xs flex items-center gap-2 self-start sm:self-auto transition">
+              <i class="fa-solid fa-play"></i> Listen Sentence
+            </button>
+          </div>
+        `;
+      });
+    }
+
+    function loadSentencePuzzle(index) {
+      currentPuzzleIndex = index;
+      selectedPuzzleWords = [];
+      const puzzle = sentencePuzzles[index];
+
+      renderSentenceSelectorButtons();
+
+      const dropzone = document.getElementById('sentence-dropzone');
+      dropzone.innerHTML = `<span class="text-sm font-bold text-slate-400 italic" id="empty-drop-msg">Click word cards below to put them here...</span>`;
+
+      const sourceContainer = document.getElementById('sentence-source-cards');
+      sourceContainer.innerHTML = '';
+
+      // Shuffle parts for display
+      const shuffledParts = [...puzzle.parts].sort(() => Math.random() - 0.5);
+
+      shuffledParts.forEach((part, idx) => {
+        let colorClass = "bg-blue-500";
+        if(part.type === "verb") colorClass = "bg-emerald-500";
+        if(part.type === "adj") colorClass = "bg-amber-500";
+
+        sourceContainer.innerHTML += `
+          <button id="puzzle-word-${idx}" onclick="addWordToDropzone('${part.text}', 'puzzle-word-${idx}')" class="px-5 py-3 ${colorClass} text-white font-heading font-bold text-base rounded-2xl shadow hover:opacity-90 transition">
+            ${part.text}
+          </button>
+        `;
+      });
+
+      document.getElementById('sentence-feedback').className = "hidden p-4 rounded-2xl text-center font-bold text-sm";
+    }
+
+    function addWordToDropzone(text, elementId) {
+      const el = document.getElementById(elementId);
+      if(el.classList.contains('opacity-30')) return; // Already picked
+
+      selectedPuzzleWords.push(text);
+      el.classList.add('opacity-30', 'cursor-not-allowed');
+
+      const dropzone = document.getElementById('sentence-dropzone');
+      const emptyMsg = document.getElementById('empty-drop-msg');
+      if(emptyMsg) emptyMsg.remove();
+
+      dropzone.innerHTML += `
+        <span class="px-4 py-2 bg-white text-slate-800 border-2 border-emerald-400 font-heading font-bold text-base rounded-xl shadow-sm">
+          ${text}
+        </span>
+      `;
+    }
+
+    function clearSentencePuzzle() {
+      loadSentencePuzzle(currentPuzzleIndex);
+    }
+
+    function checkSentencePuzzle() {
+      const puzzle = sentencePuzzles[currentPuzzleIndex];
+      const feedback = document.getElementById('sentence-feedback');
+      feedback.classList.remove('hidden');
+
+      const userSentence = selectedPuzzleWords.join(' ');
+      const targetSentence = puzzle.correctOrder.join(' ');
+
+      if(userSentence === targetSentence) {
+        feedback.className = "p-4 rounded-2xl text-center font-bold text-sm bg-emerald-100 text-emerald-900 border border-emerald-300";
+        feedback.innerHTML = `🎉 Perfect! You arranged the sentence correctly: "<strong>${targetSentence}</strong>"`;
+        speakWord(targetSentence);
+        triggerConfetti();
+        addStars(5);
+      } else {
+        feedback.className = "p-4 rounded-2xl text-center font-bold text-sm bg-rose-100 text-rose-900 border border-rose-300";
+        feedback.innerHTML = `❌ Oops! Not quite right yet. Try rearranging the words in order!`;
+      }
+    }
+
+    function verifyWrittenSentence() {
+      const text = document.getElementById('pupil-written-sentence').value.trim();
+      const res = document.getElementById('writing-verification-res');
+      res.classList.remove('hidden');
+
+      if(!text) {
+        res.className = "p-3 bg-amber-100 text-amber-900 rounded-xl text-xs font-bold";
+        res.innerText = "Please type a sentence first!";
+        return;
+      }
+
+      const startsWithCap = /^[A-Z]/.test(text);
+      const endsWithPeriod = /[.!?]$/.test(text);
+      const hasSpaces = text.includes(' ');
+
+      document.getElementById('chk-cap').checked = startsWithCap;
+      document.getElementById('chk-space').checked = hasSpaces;
+      document.getElementById('chk-punc').checked = endsWithPeriod;
+
+      if(startsWithCap && endsWithPeriod && hasSpaces) {
+        res.className = "p-3 bg-emerald-100 text-emerald-900 rounded-xl text-xs font-bold";
+        res.innerHTML = "🌟 Excellent writing! Capital letter, finger spaces, and punctuation detected!";
+        triggerConfetti();
+        addStars(3);
+      } else {
+        res.className = "p-3 bg-sky-100 text-sky-900 rounded-xl text-xs font-bold";
+        res.innerHTML = "💡 Good try! Make sure your sentence starts with a capital letter and ends with a full stop!";
+      }
+    }
+
+    function launchArcadeGame(gameType) {
+      const container = document.getElementById('arcade-game-view');
+      
+      if(gameType === 'pop') {
+        container.innerHTML = `
+          <div class="text-center space-y-4 py-8">
+            <span class="text-6xl">🎈</span>
+            <h3 class="font-heading text-2xl font-bold text-slate-800">Word Category Pop Game</h3>
+            <p class="text-xs text-slate-500 max-w-md mx-auto">Is "JUMPS" a Noun, Verb, or Adjective?</p>
+            <div class="flex justify-center gap-4 pt-2">
+              <button onclick="answerArcade(false)" class="px-6 py-3 bg-blue-500 text-white font-bold rounded-2xl">Noun</button>
+              <button onclick="answerArcade(true)" class="px-6 py-3 bg-emerald-500 text-white font-bold rounded-2xl">Verb</button>
+              <button onclick="answerArcade(false)" class="px-6 py-3 bg-amber-500 text-white font-bold rounded-2xl">Adjective</button>
+            </div>
+            <div id="arcade-pop-res" class="mt-4 font-bold text-sm"></div>
+          </div>
+        `;
+      } else if(gameType === 'slides') {
+        container.innerHTML = `
+          <div class="space-y-4">
+            <div class="flex items-center justify-between border-b pb-2">
+              <h4 class="font-heading font-bold text-lg text-slate-800">Year 3 Grammar Slides: Action Verbs</h4>
+              <span class="text-xs font-bold text-slate-400">Slide 1 of 3</span>
+            </div>
+            <div class="bg-slate-900 text-white p-8 rounded-2xl text-center space-y-4">
+              <span class="text-5xl">🏃‍♀️</span>
+              <h3 class="font-heading text-2xl font-bold text-amber-400">Verbs are Action Words!</h3>
+              <p class="text-sm text-slate-300 max-w-md mx-auto">Verbs tell us what someone or something is doing. Examples: <i>runs, eats, jumps, reads</i>.</p>
+            </div>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="text-center py-8 space-y-3">
+            <span class="text-5xl">🧠</span>
+            <h4 class="font-heading text-xl font-bold text-slate-800">Memory Card Match Loaded!</h4>
+            <p class="text-xs text-slate-500">Tap cards to match pictures with vocabulary.</p>
+          </div>
+        `;
+      }
+    }
+
+    function answerArcade(isCorrect) {
+      const res = document.getElementById('arcade-pop-res');
+      if(isCorrect) {
+        res.className = "text-emerald-600 font-bold";
+        res.innerText = "🎯 Correct! 'JUMPS' is an Action Verb!";
+        triggerConfetti();
+        addStars(2);
+      } else {
+        res.className = "text-rose-600 font-bold";
+        res.innerText = "Try again!";
+      }
+    }
+
+    function loadWorksheet(type) {
+      const area = document.getElementById('printable-area');
+      
+      if(type === 'matching') {
+        area.innerHTML = `
+          <div class="text-center border-b pb-4 space-y-1">
+            <h2 class="text-2xl font-bold text-slate-900">LitKit Primary English Worksheet A</h2>
+            <p class="text-xs text-slate-500">Module 1: Vocabulary & Picture Matching Practice</p>
+          </div>
+
+          <div class="flex justify-between text-xs font-bold text-slate-700 py-2 border-b border-slate-200">
+            <span>Name: ______________________</span>
+            <span>Class: Year 3 ______</span>
+            <span>Date: ____________</span>
+          </div>
+
+          <p class="text-xs font-bold text-slate-700">Instruction: Draw a line matching each picture to the correct word.</p>
+
+          <div class="grid grid-cols-2 gap-8 py-6">
+            <div class="space-y-6">
+              <div class="p-4 border rounded-xl flex items-center justify-between"><span>1. 🐶</span> <span class="w-4 h-4 rounded-full border border-slate-400"></span></div>
+              <div class="p-4 border rounded-xl flex items-center justify-between"><span>2. 🍎</span> <span class="w-4 h-4 rounded-full border border-slate-400"></span></div>
+              <div class="p-4 border rounded-xl flex items-center justify-between"><span>3. 🐰</span> <span class="w-4 h-4 rounded-full border border-slate-400"></span></div>
+            </div>
+
+            <div class="space-y-6">
+              <div class="p-4 border rounded-xl flex items-center justify-between"><span class="w-4 h-4 rounded-full border border-slate-400"></span> <span class="font-bold">rabbit</span></div>
+              <div class="p-4 border rounded-xl flex items-center justify-between"><span class="w-4 h-4 rounded-full border border-slate-400"></span> <span class="font-bold">dog</span></div>
+              <div class="p-4 border rounded-xl flex items-center justify-between"><span class="w-4 h-4 rounded-full border border-slate-400"></span> <span class="font-bold">apple</span></div>
+            </div>
+          </div>
+        `;
+      } else {
+        area.innerHTML = `
+          <div class="text-center border-b pb-4 space-y-1">
+            <h2 class="text-2xl font-bold text-slate-900">LitKit Primary English Worksheet B</h2>
+            <p class="text-xs text-slate-500">Module 3: Guided Sentence Writing Practice</p>
+          </div>
+
+          <div class="flex justify-between text-xs font-bold text-slate-700 py-2 border-b border-slate-200">
+            <span>Name: ______________________</span>
+            <span>Class: Year 3 ______</span>
+            <span>Date: ____________</span>
+          </div>
+
+          <p class="text-xs font-bold text-slate-700">Instruction: Arrange the words to write a complete sentence. Remember capital letters and full stops!</p>
+
+          <div class="space-y-6 py-4">
+            <div class="p-4 border rounded-xl space-y-2">
+              <p class="text-xs font-bold text-slate-600">1. [ eats ] [ The girl ] [ an apple. ]</p>
+              <div class="border-b-2 border-slate-300 py-3"></div>
+            </div>
+
+            <div class="p-4 border rounded-xl space-y-2">
+              <p class="text-xs font-bold text-slate-600">2. [ in the garden. ] [ The dog ] [ runs ]</p>
+              <div class="border-b-2 border-slate-300 py-3"></div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Helper Rewards
+    function triggerConfetti() {
+      if(typeof confetti === 'function') {
+        confetti({
+          particleCount: 50,
+          spread: 60,
+          origin: { y: 0.6 }
+        });
+      }
+    }
+
+    function addStars(num) {
+      userStars += num;
+      document.getElementById('star-count').innerText = userStars;
+    }
+
+    // Initialization on Page Load
+    window.onload = function() {
+      renderFlashcards();
+      renderMatchGame();
+      renderPersonalWordBank();
+      renderSyllableCards();
+      renderReadingStrips();
+      loadSentencePuzzle(0);
+      launchArcadeGame('pop');
+      loadWorksheet('matching');
+      renderCustomLinks();
+    };
+  </script>
+</body>
+</html>
